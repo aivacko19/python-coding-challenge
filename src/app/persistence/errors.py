@@ -8,3 +8,7 @@ class EntityNotFoundError(RepositoryError):
 
 class CreateError(RepositoryError):
     pass
+
+
+class UpdateError(RepositoryError):
+    pass

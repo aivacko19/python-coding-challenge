@@ -4,7 +4,7 @@ from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
 from pydantic.dataclasses import dataclass
 
-from apischema.schema import schema
+from apischema.schema import schema, schema_tags
 
 
 @dataclass
@@ -27,5 +27,12 @@ def _validation_error_to_structure(error: ValidationError) -> SchemaError:
 def validate_todo_entry(raw_data: dict) -> Optional[SchemaError]:
     try:
         validate(instance=raw_data, schema=schema)
+    except ValidationError as err:
+        return _validation_error_to_structure(error=err)
+
+
+def validate_tags(raw_data: dict) -> Optional[SchemaError]:
+    try:
+        validate(instance=raw_data, schema=schema_tags)
     except ValidationError as err:
         return _validation_error_to_structure(error=err)

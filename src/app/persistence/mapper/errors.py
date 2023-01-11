@@ -8,3 +8,7 @@ class EntityNotFoundMapperError(MapperError):
 
 class CreateMapperError(MapperError):
     pass
+
+
+class UpdateMapperError(MapperError):
+    pass

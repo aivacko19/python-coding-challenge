@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -11,4 +11,5 @@ class AbstractEntity(BaseModel):
 class TodoEntry(AbstractEntity):
     summary: str
     detail: Optional[str]
+    tags: Optional[List[str]] = []
     created_at: datetime

@@ -59,3 +59,24 @@ async def test_todo_entry_create_error() -> None:
 
     with pytest.raises(CreateError):
         await repository.create(entity=data)
+
+
+@pytest.mark.asyncio
+async def test_update_todo_entry_tags() -> None:
+    mapper = MemoryTodoEntryMapper(storage=_memory_storage)
+    repository = TodoEntryRepository(mapper=mapper)
+
+    data = TodoEntry(
+        summary="Lorem Ipsum",
+        detail=None,
+        created_at=datetime.now(tz=timezone.utc),
+    )
+
+    entity = await repository.create(entity=data)
+
+    entity.tags = ["doc", "secret"]
+
+    await repository.update(entity=entity)
+    entity = await repository.get(identifier=entity.id)
+    
+    assert len(entity.tags) == 2

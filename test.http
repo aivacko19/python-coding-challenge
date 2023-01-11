@@ -58,3 +58,18 @@ Content-Type: application/json
     });
 %}
 ###
+
+## POST todo entry tags
+POST http://{{host}}:{{port}}/todo/1/tags/
+Content-Type: application/json
+
+{
+  "tags": ["doc", "secret"]
+}
+
+> {%
+    client.test("Post todo entry tags", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+###

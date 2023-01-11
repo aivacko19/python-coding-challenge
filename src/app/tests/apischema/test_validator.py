@@ -1,4 +1,4 @@
-from apischema.validator import validate_todo_entry
+from apischema.validator import validate_todo_entry, validate_tags
 
 
 def test_short_summary_in_todo_entry() -> None:
@@ -13,3 +13,22 @@ def test_short_summary_in_todo_entry() -> None:
     assert "maxLength" in error.validation_schema
     assert "minLength" in error.validation_schema
     assert "type" in error.validation_schema
+
+
+def test_sample_tags() -> None:
+    data = {
+        "tags": ["doc", "secret"],
+    }
+
+    error = validate_tags(raw_data=data)
+    assert not error
+
+
+def test_empty_tags() -> None:
+    data = {
+        "tags": [],
+    }
+
+    error = validate_tags(raw_data=data)
+    assert error.path == "tags"
+    assert "minItems" in error.validation_schema
