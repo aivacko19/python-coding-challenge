@@ -6,3 +6,4 @@ pyyaml
 pytest
 Pytest-asyncio
 pymongo[srv]
+python-dotenv

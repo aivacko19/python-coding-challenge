@@ -85,7 +85,7 @@ async def create_new_todo_entry(request: Request) -> Response:
             media_type="application/json",
         )
 
-    mapper = MongoDBTodoEntryMapper():
+    mapper = MongoDBTodoEntryMapper()
     repository = TodoEntryRepository(mapper=mapper)
 
     try:

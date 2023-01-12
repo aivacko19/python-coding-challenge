@@ -2,26 +2,30 @@ import os
 from random import randint
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
+from dotenv import load_dotenv
 
 from entities import TodoEntry
 from persistence.mapper.errors import EntityNotFoundMapperError, CreateMapperError, UpdateMapperError
 from persistence.mapper.interfaces import TodoEntryMapperInterface
 
+load_dotenv()
 
-CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING', '')
+CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 
 
 class MongoDBTodoEntryMapper(TodoEntryMapperInterface):
    _client: MongoClient
 
-   def __init__(self, fixture: dict = None):
+   def __init__(self, fixture: dict = None, db: str = 'mydb', clean: bool = False):
       fixture = fixture or {}
       
       self._client = MongoClient(CONNECTION_STRING)
-      self._db = self._client.mydb
+      self._db = self._client[db]
+      if clean:
+         self._db.drop_collection('todoentries')
       self._collection = self._db.todoentries
 
-      for entity in fixture:
+      for entity in fixture.values():
          self._insert_entity(entity=entity)
 
    def close(self):
@@ -38,7 +42,7 @@ class MongoDBTodoEntryMapper(TodoEntryMapperInterface):
       if not res:
          raise EntityNotFoundMapperError(f"Entity `id:{identifier}` was not found.")
       
-      return TodoEntry.from_json(**res)
+      return TodoEntry.from_db(**res)
 
    async def create(self, entity: TodoEntry) -> TodoEntry:
       try:
