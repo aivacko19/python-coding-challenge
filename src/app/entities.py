@@ -7,6 +7,16 @@ from pydantic import BaseModel
 class AbstractEntity(BaseModel):
     id: Optional[int]
 
+    @classmethod
+    def from_db(cls, **data):
+        id = data.pop('_id')
+        return cls(id=id, **data)
+
+    def to_db(self):
+        data = dict(self).copy()
+        data['_id'] = data.pop('id')
+        return data
+
 
 class TodoEntry(AbstractEntity):
     summary: str

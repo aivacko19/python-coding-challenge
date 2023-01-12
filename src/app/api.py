@@ -9,7 +9,8 @@ from starlette.routing import Route
 from apischema.encoder import encode_to_json_response, encode_error_to_json_response
 from apischema.validator import validate_todo_entry, validate_tags
 from entities import TodoEntry
-from persistence.mapper.memory import MemoryTodoEntryMapper
+# from persistence.mapper.memory import MemoryTodoEntryMapper
+from persistence.mapper.mongodb import MongoDBTodoEntryMapper
 from persistence.repository import TodoEntryRepository
 
 from usecases import get_todo_entry, create_todo_entry, add_tags_to_todo_entry, UseCaseError, NotFoundError
@@ -17,6 +18,10 @@ from usecases import get_todo_entry, create_todo_entry, add_tags_to_todo_entry, 
 _MAPPER_IN_MEMORY_STORAGE = {
     1: TodoEntry(id=1, summary="Lorem Ipsum", created_at=datetime.now(tz=timezone.utc))
 }
+
+# Initialize db with fixture to have same initial state as before
+with MongoDBTodoEntryMapper(fixture=_MAPPER_IN_MEMORY_STORAGE) as mapper:
+    pass
 
 
 async def get_todo(request: Request) -> Response:
@@ -41,11 +46,12 @@ async def get_todo(request: Request) -> Response:
     try:
         identifier = request.path_params["id"]  # TODO: add validation
 
-        mapper = MemoryTodoEntryMapper(storage=_MAPPER_IN_MEMORY_STORAGE)
+        mapper = MongoDBTodoEntryMapper()
         repository = TodoEntryRepository(mapper=mapper)
 
         entity = await get_todo_entry(identifier=identifier, repository=repository)
         content = encode_to_json_response(entity=entity)
+        mapper.close()
 
     except NotFoundError:
         return Response(
@@ -79,7 +85,7 @@ async def create_new_todo_entry(request: Request) -> Response:
             media_type="application/json",
         )
 
-    mapper = MemoryTodoEntryMapper(storage=_MAPPER_IN_MEMORY_STORAGE)
+    mapper = MongoDBTodoEntryMapper():
     repository = TodoEntryRepository(mapper=mapper)
 
     try:
@@ -92,6 +98,8 @@ async def create_new_todo_entry(request: Request) -> Response:
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             media_type="application/json",
         )
+
+    mapper.close()
 
     return Response(
         content=content, status_code=HTTPStatus.CREATED, media_type="application/json"
@@ -132,7 +140,7 @@ async def add_todo_entry_tags(request: Request) -> Response:
             media_type="application/json",
         )
 
-    mapper = MemoryTodoEntryMapper(storage=_MAPPER_IN_MEMORY_STORAGE)
+    mapper = MongoDBTodoEntryMapper()
     repository = TodoEntryRepository(mapper=mapper)
 
     tags = data['tags']
@@ -146,6 +154,8 @@ async def add_todo_entry_tags(request: Request) -> Response:
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             media_type="application/json",
         )
+
+    mapper.close()
 
     return Response(
         content=content, status_code=HTTPStatus.CREATED, media_type="application/json"
